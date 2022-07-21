@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package marketplace_secondary;
+
+option go_package = "github.com/blidd/fractr-proto/marketplace_secondary";
+
+import "marketplace_common/marketplace_common.proto";
+
+message PlaceBidRequest {
+    marketplace_common.Bid bid = 1;
+}
+
+message PlaceBidResponse {
+    uint32 quantity = 1;
+}
+
+message GetBidStatusRequest {
+}
+
+message GetBidStatusResponse {
+    uint32 quantity = 1;
+}

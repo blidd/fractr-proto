@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+package marketplace_common;
+
+option go_package = "github.com/blidd/fractr-proto/marketplace_common";
+
+message Bid {
+    uint32 artwork_id = 1;
+    uint32 bidder_id = 2;
+}
