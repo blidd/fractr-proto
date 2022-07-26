@@ -11,17 +11,20 @@ message PlaceBidRequest {
 }
 
 message PlaceBidResponse {
-    uint32 quantity = 1;
+    repeated marketplace_common.Order orders = 1;
+    uint32 quantity_filled = 2;
 }
 
-message GetBidStatusRequest {
+message PlaceAskRequest {
+    marketplace_common.Ask ask = 1;
 }
 
-message GetBidStatusResponse {
-    uint32 quantity = 1;
+message PlaceAskResponse {
+    repeated marketplace_common.Order orders = 1;
+    uint32 quantity_filled = 2;
 }
 
 service MarketplaceSecondary {
     rpc PlaceBid(PlaceBidRequest) returns (PlaceBidResponse);
-    rpc GetBidStatus(GetBidStatusRequest) returns (GetBidStatusResponse);
+    rpc PlaceAsk(PlaceAskRequest) returns (PlaceAskResponse);
 }

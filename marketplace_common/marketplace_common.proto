@@ -11,3 +11,20 @@ message Bid {
     uint32 quantity = 4;
     uint32 price = 5;
 }
+
+message Ask {
+    uint32 id = 1;
+    uint32 artwork_id = 2;
+    uint32 asker_id = 3;
+    uint32 quantity = 4;
+    uint32 price = 5;
+}
+
+message Order {
+    uint32 bid_id = 1;
+    uint32 ask_id = 2;
+    uint32 artwork_id = 3;
+    uint32 price = 4;
+    uint32 quantity_filled = 5;
+    uint32 status = 6;
+}
