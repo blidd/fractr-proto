@@ -1,0 +1,137 @@
+syntax = "proto3";
+
+package service;
+
+option go_package = "github.com/blidd/fractr-proto/service";
+
+import "marketplace_common/marketplace_common.proto";
+
+message Artist {
+    uint32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string description = 4;
+}
+
+message Artwork {
+    uint32 id = 1;
+    Artist artist = 2;
+    string name = 3;
+    repeated uint32 owner_ids = 4;
+    repeated marketplace_common.Bid bids = 5;
+    repeated marketplace_common.Ask asks = 6;
+}
+
+message Shard {
+    uint32 artwork_id = 1;
+    uint32 owner_id = 2;
+    repeated uint32 token_ids = 3;
+}
+
+message GetArtworksByTitleRequest {
+    string title = 1;
+}
+
+message GetArtworksByTitleResponse {
+    repeated Artwork artworks = 1;
+}
+
+message GetArtworksByArtistRequest {
+    string artist_name = 1;
+}
+
+message GetArtworksByArtistResponse {
+    repeated Artwork artworks = 1;
+}
+
+message UserProfile {
+    uint32 user_id = 1;
+    bool is_artist = 2;
+    repeated marketplace_common.Bid current_bids = 3;
+    repeated marketplace_common.Ask current_asks = 4;
+    repeated Shard owned_shards = 5;
+}
+
+message GetUserProfileRequest {
+    uint32 user_id = 1;
+}
+
+message GetUserProfileResponse {
+    UserProfile profile = 1;
+}
+
+message BidStatus {
+    marketplace_common.Bid bid = 1;
+    uint32 quantity_filled = 2;
+    enum Status {
+        NEW = 0;
+        PARTIALLY_FILLED = 1;
+        REJECTED = 2;
+        COMPLETE = 3;
+    }
+}
+
+message AskStatus {
+    marketplace_common.Ask ask = 1;
+    uint32 quantity_filled = 2;
+    enum Status {
+        NEW = 0;
+        PARTIALLY_FILLED = 1;
+        REJECTED = 2;
+        COMPLETE = 3;
+    }
+}
+
+message BidRequest {
+    marketplace_common.Bid bid = 1;
+    enum Market {
+        PRIMARY = 0;
+        SECONDARY = 1;
+    }
+}
+
+
+message BidResponse {
+    BidStatus status = 1;
+}
+
+message GetBidsRequest {
+    repeated uint32 bid_ids = 1;
+}
+
+message GetBidsResponse {
+    repeated BidStatus bid_statuses = 1;
+}
+
+message AskRequest {
+    marketplace_common.Ask ask = 1;
+    enum Market {
+        PRIMARY = 0;
+        SECONDARY = 1;
+    }
+}
+
+message AskResponse {
+    AskStatus status = 1;
+}
+
+message GetAsksRequest {
+    repeated uint32 ask_ids = 1;
+}
+
+message GetAsksResponse {
+    repeated BidStatus ask_statuses = 1;
+}
+
+service Service {
+    rpc GetArtworksByTitle(GetArtworksByTitleRequest) returns (GetArtworksByTitleResponse);
+    rpc GetArtworksByArtist(GetArtworksByArtistRequest) returns (GetArtworksByArtistResponse);
+
+    rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
+
+    rpc Bid(BidRequest) returns (BidResponse);
+    rpc Ask(AskRequest) returns (AskResponse);
+    
+    rpc GetBids(GetBidsRequest) returns (GetBidsResponse);
+    rpc GetAsks(GetAsksRequest) returns (GetAsksResponse);
+}

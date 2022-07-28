@@ -1,0 +1,6 @@
+syntax = "proto3";
+
+package storage;
+
+option go_package = "github.com/blidd/fractr-proto/storage";
+
