@@ -4,3 +4,30 @@ package storage;
 
 option go_package = "github.com/blidd/fractr-proto/storage";
 
+message Query {
+
+}
+
+message GetRequest {
+
+}
+
+message GetResponse {
+
+}
+
+message PutRequest {
+
+}
+
+message PutResponse {
+
+}
+
+message DeleteRequest {
+
+}
+
+message DeleteResponse {
+
+}

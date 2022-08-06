@@ -1,6 +1,0 @@
-syntax = "proto3";
-
-package platform;
-
-option go_package = "github.com/blidd/fractr-proto/platform";
-
