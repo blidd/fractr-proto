@@ -4,6 +4,15 @@ package storage;
 
 option go_package = "github.com/blidd/fractr-proto/storage";
 
+import "marketplace_common/marketplace_common.proto";
+
+message Artist {
+    uint32 id = 1;
+    string first_name = 2;
+    string last_name = 3;
+    string description = 4;
+}
+
 message Artwork {
     uint32 id = 1;
     Artist artist = 2;
@@ -74,8 +83,8 @@ message GetResponse {
         USERASKS = 4;
         USERPROFILE = 5;
     }
-    repeated Artworks = 1;
-    UserProfile profile = 2;
+    repeated Artwork artworks = 1;
+    optional UserProfile profile = 2;
     repeated BidStatus bidStatus = 3;
     repeated AskStatus askStatus = 4;
  
