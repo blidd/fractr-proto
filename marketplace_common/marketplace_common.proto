@@ -28,3 +28,22 @@ message Order {
     uint32 quantity_filled = 5;
     uint32 status = 6;
 }
+
+enum Status {
+    NEW = 0;
+    PARTIALLY_FILLED = 1;
+    REJECTED = 2;
+    COMPLETE = 3;
+}
+
+message BidStatus {
+    marketplace_common.Bid bid = 1;
+    uint32 quantity_filled = 2;
+    Status status = 3;
+}
+
+message AskStatus {
+    marketplace_common.Ask ask = 1;
+    uint32 quantity_filled = 2;
+    Status status = 3;
+}

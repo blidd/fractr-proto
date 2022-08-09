@@ -11,6 +11,7 @@ message Artist {
     string first_name = 2;
     string last_name = 3;
     string description = 4;
+    optional uint32 user_id = 5;
 }
 
 message Artwork {
@@ -44,9 +45,17 @@ message GetArtworksByArtistResponse {
     repeated Artwork artworks = 1;
 }
 
+message GetArtistsByNameRequest {
+    string name = 1;
+}
+
+message GetArtistsByNameResponse {
+    repeated Artist artists = 1;
+}
+
 message UserProfile {
     uint32 user_id = 1;
-    bool is_artist = 2;
+    optional uint32 artist_id = 2;
     repeated marketplace_common.Bid current_bids = 3;
     repeated marketplace_common.Ask current_asks = 4;
     repeated Shard owned_shards = 5;
@@ -60,39 +69,18 @@ message GetUserProfileResponse {
     UserProfile profile = 1;
 }
 
-message BidStatus {
-    marketplace_common.Bid bid = 1;
-    uint32 quantity_filled = 2;
-    enum Status {
-        NEW = 0;
-        PARTIALLY_FILLED = 1;
-        REJECTED = 2;
-        COMPLETE = 3;
-    }
-}
-
-message AskStatus {
-    marketplace_common.Ask ask = 1;
-    uint32 quantity_filled = 2;
-    enum Status {
-        NEW = 0;
-        PARTIALLY_FILLED = 1;
-        REJECTED = 2;
-        COMPLETE = 3;
-    }
+enum Market {
+    PRIMARY = 0;
+    SECONDARY = 1;
 }
 
 message BidRequest {
     marketplace_common.Bid bid = 1;
-    enum Market {
-        PRIMARY = 0;
-        SECONDARY = 1;
-    }
+    Market market = 2;
 }
 
-
 message BidResponse {
-    BidStatus status = 1;
+    marketplace_common.BidStatus status = 1;
 }
 
 message GetBidsRequest {
@@ -100,19 +88,16 @@ message GetBidsRequest {
 }
 
 message GetBidsResponse {
-    repeated BidStatus bid_statuses = 1;
+    repeated marketplace_common.BidStatus bid_statuses = 1;
 }
 
 message AskRequest {
     marketplace_common.Ask ask = 1;
-    enum Market {
-        PRIMARY = 0;
-        SECONDARY = 1;
-    }
+    Market market = 2;
 }
 
 message AskResponse {
-    AskStatus status = 1;
+    marketplace_common.AskStatus status = 1;
 }
 
 message GetAsksRequest {
@@ -120,7 +105,7 @@ message GetAsksRequest {
 }
 
 message GetAsksResponse {
-    repeated BidStatus ask_statuses = 1;
+    repeated marketplace_common.AskStatus ask_statuses = 1;
 }
 
 service Service {

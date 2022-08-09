@@ -5,105 +5,75 @@ package storage;
 option go_package = "github.com/blidd/fractr-proto/storage";
 
 import "marketplace_common/marketplace_common.proto";
+import "service/service.proto";
 
-message Artist {
-    uint32 id = 1;
-    string first_name = 2;
-    string last_name = 3;
-    string description = 4;
-}
+// message Artist {
+//     uint32 id = 1;
+//     string first_name = 2;
+//     string last_name = 3;
+//     string description = 4;
+// }
 
-message Artwork {
-    uint32 id = 1;
-    Artist artist = 2;
-    string name = 3;
-    repeated uint32 owner_ids = 4;
-    repeated marketplace_common.Bid bids = 5;
-    repeated marketplace_common.Ask asks = 6;
-}
+// message Artwork {
+//     uint32 id = 1;
+//     Artist artist = 2;
+//     string name = 3;
+//     repeated uint32 owner_ids = 4;
+//     repeated marketplace_common.Bid bids = 5;
+//     repeated marketplace_common.Ask asks = 6;
+// }
 
-message Shard {
-    uint32 artwork_id = 1;
-    uint32 owner_id = 2;
-    repeated uint32 token_ids = 3;
-}
+// message Shard {
+//     uint32 artwork_id = 1;
+//     uint32 owner_id = 2;
+//     repeated uint32 token_ids = 3;
+// }
 
-message UserProfile {
-    uint32 user_id = 1;
-    bool is_artist = 2;
-    repeated marketplace_common.Bid current_bids = 3;
-    repeated marketplace_common.Ask current_asks = 4;
-    repeated Shard owned_shards = 5;
-}
+// message UserProfile {
+//     uint32 user_id = 1;
+//     bool is_artist = 2;
+//     repeated marketplace_common.Bid current_bids = 3;
+//     repeated marketplace_common.Ask current_asks = 4;
+//     repeated service.Shard owned_shards = 5;
+// }
 
-message BidStatus {
-    marketplace_common.Bid bid = 1;
-    uint32 quantity_filled = 2;
-    enum Status {
-        NEW = 0;
-        PARTIALLY_FILLED = 1;
-        REJECTED = 2;
-        COMPLETE = 3;
-    }
-}
-
-message AskStatus {
-    marketplace_common.Ask ask = 1;
-    uint32 quantity_filled = 2;
-    enum Status {
-        NEW = 0;
-        PARTIALLY_FILLED = 1;
-        REJECTED = 2;
-        COMPLETE = 3;
-    }
+enum Type {
+    ARTWORK = 0;
+    BID = 1;
+    ASK = 2;
+    USER = 3;
+    USERBIDS = 4;
+    USERASKS = 5;
 }
 
 message GetRequest {
-    enum Type {
-        ARTWORK = 0;
-        BID = 1;
-        ASK = 2;
-        USERBIDS = 3;
-        USERASKS = 4;
-    }
-    optional uint32 id = 1; // optional field
-    repeated uint32 user_ids = 2; // optional field
-    optional bool primary_market = 3; // optional field
-    optional string artist_name = 4; // optional field
-    optional string art_title = 5; // optional field
+    Type type = 1;
+    optional uint32 id = 2; // optional field
+    repeated uint32 ids = 3; // optional field
+    optional bool primary_market = 4; // optional field
+    optional string artist_name = 5; // optional field
+    optional string art_title = 6; // optional field
 
 }
 
 message GetResponse {
-    enum Type {
-        ARTWORK = 0;
-        BID = 1;
-        ASK = 2;
-        USERBIDS = 3;
-        USERASKS = 4;
-        USERPROFILE = 5;
-    }
-    repeated Artwork artworks = 1;
-    optional UserProfile profile = 2;
-    repeated BidStatus bidStatus = 3;
-    repeated AskStatus askStatus = 4;
+    Type type = 1;
+    repeated service.Artwork artworks = 2;
+    optional service.UserProfile profile = 3;
+    repeated marketplace_common.BidStatus bid_statuses = 4;
+    repeated marketplace_common.AskStatus ask_statuses = 5;
  
 }
 
 message PutRequest {
-    enum Type {
-        ARTWORK = 0;
-        BID = 1;
-        ASK = 2;
-        USERBIDS = 3;
-        USERASKS = 4;
-        USERPROFILE = 5;
-    }
-    optional uint32 id = 1; // optional field
-    repeated uint32 user_ids = 2; // optional field
-    optional bool primary_market = 3; // optional field
-    optional string artist_name = 4; // optional field
-    optional string art_title = 5; // optional field
+    Type type = 1;
+    optional uint32 id = 2; // optional field
+    repeated uint32 ids = 3; // optional field
+    optional bool primary_market = 4; // optional field
+    optional string artist_name = 5; // optional field
+    optional string art_title = 6; // optional field
+    optional marketplace_common.BidStatus bid_status = 7;
+    optional marketplace_common.AskStatus ask_status = 8;
 
 }
 
@@ -112,19 +82,12 @@ message PutResponse {
 }
 
 message DeleteRequest {
-    enum Type {
-        ARTWORK = 0;
-        BID = 1;
-        ASK = 2;
-        USERBIDS = 3;
-        USERASKS = 4;
-        USERPROFILE = 5;
-    }
-    optional uint32 id = 1; // optional field
-    repeated uint32 user_ids = 2; // optional field
-    optional bool primary_market = 3; // optional field
-    optional string artist_name = 4; // optional field
-    optional string art_title = 5; // optional field
+    Type type = 1;
+    optional uint32 id = 2; // optional field
+    repeated uint32 ids = 3; // optional field
+    optional bool primary_market = 4; // optional field
+    optional string artist_name = 5; // optional field
+    optional string art_title = 6; // optional field
 
 }
 
@@ -133,7 +96,7 @@ message DeleteResponse {
 
 }
 
-service Service {
+service Storage {
     rpc Get(GetRequest) returns (GetResponse);
     rpc Put(PutRequest) returns (PutResponse);
 
