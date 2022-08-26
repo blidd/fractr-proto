@@ -8,10 +8,14 @@ import "marketplace_common/marketplace_common.proto";
 
 message Artist {
     uint32 id = 1;
-    string first_name = 2;
-    string last_name = 3;
-    string description = 4;
-    optional uint32 user_id = 5;
+    string name = 2;
+    string description = 3;
+    string handle = 4;
+}
+
+enum Market {
+    PRIMARY = 0;
+    SECONDARY = 1;
 }
 
 message Artwork {
@@ -19,14 +23,45 @@ message Artwork {
     Artist artist = 2;
     string name = 3;
     repeated uint32 owner_ids = 4;
-    repeated marketplace_common.Bid bids = 5;
-    repeated marketplace_common.Ask asks = 6;
+    string description = 5;
+    uint32 num_shares = 6;
+    Market market = 7;
+    uint32 conversion_date = 8;
+}
+
+message ArtworkLiveData {
+    uint32 artwork_id = 1;
+    uint32 hi_bid_price = 3;
+    uint32 lo_ask_price = 4;
+    uint32 last_tx_price = 5;
+
+    uint32 num_shares_available = 6;
+
+    repeated marketplace_common.Bid bids = 7;
+    repeated marketplace_common.Ask asks = 8;
 }
 
 message Shard {
     uint32 artwork_id = 1;
     uint32 owner_id = 2;
     repeated uint32 token_ids = 3;
+}
+
+message GetArtworkDetailsRequest {
+    uint32 artwork_id = 1;
+}
+
+message GetArtworkDetailsResponse {
+    Artwork artwork_details = 1;
+}
+
+message GetArtworkLiveDataRequest {
+    uint32 artwork_id = 1;
+}
+
+message GetArtworkLiveDataResponse {
+    uint32 time_updated = 1; // unix time
+    ArtworkLiveData live_data = 2;
 }
 
 message GetArtworksByTitleRequest {
@@ -59,6 +94,8 @@ message UserProfile {
     repeated marketplace_common.Bid current_bids = 3;
     repeated marketplace_common.Ask current_asks = 4;
     repeated Shard owned_shards = 5;
+    repeated uint32 saved_artist_ids = 6;
+    repeated uint32 saved_artwork_ids = 7;
 }
 
 message GetUserProfileRequest {
@@ -69,9 +106,15 @@ message GetUserProfileResponse {
     UserProfile profile = 1;
 }
 
-enum Market {
-    PRIMARY = 0;
-    SECONDARY = 1;
+message CreateUserProfileRequest {
+    string username = 1;
+    string pw_hash = 2;
+    bool is_artist = 3;
+    // near wallet info
+}
+
+message CreateUserProfileResponse {
+    UserProfile profile = 1;
 }
 
 message BidRequest {
@@ -109,10 +152,14 @@ message GetAsksResponse {
 }
 
 service Service {
+    rpc GetArtworkDetails(GetArtworkDetailsRequest) returns (GetArtworkDetailsResponse);
+    rpc GetArtworkLiveData(GetArtworkLiveDataRequest) returns (stream GetArtworkLiveDataResponse);
+
     rpc GetArtworksByTitle(GetArtworksByTitleRequest) returns (GetArtworksByTitleResponse);
     rpc GetArtworksByArtist(GetArtworksByArtistRequest) returns (GetArtworksByArtistResponse);
 
     rpc GetUserProfile(GetUserProfileRequest) returns (GetUserProfileResponse);
+    rpc CreateUserProfile(CreateUserProfileRequest) returns (CreateUserProfileResponse);
 
     rpc Bid(BidRequest) returns (BidResponse);
     rpc Ask(AskRequest) returns (AskResponse);

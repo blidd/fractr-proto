@@ -22,9 +22,12 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type ServiceClient interface {
+	GetArtworkDetails(ctx context.Context, in *GetArtworkDetailsRequest, opts ...grpc.CallOption) (*GetArtworkDetailsResponse, error)
+	GetArtworkLiveData(ctx context.Context, in *GetArtworkLiveDataRequest, opts ...grpc.CallOption) (Service_GetArtworkLiveDataClient, error)
 	GetArtworksByTitle(ctx context.Context, in *GetArtworksByTitleRequest, opts ...grpc.CallOption) (*GetArtworksByTitleResponse, error)
 	GetArtworksByArtist(ctx context.Context, in *GetArtworksByArtistRequest, opts ...grpc.CallOption) (*GetArtworksByArtistResponse, error)
 	GetUserProfile(ctx context.Context, in *GetUserProfileRequest, opts ...grpc.CallOption) (*GetUserProfileResponse, error)
+	CreateUserProfile(ctx context.Context, in *CreateUserProfileRequest, opts ...grpc.CallOption) (*CreateUserProfileResponse, error)
 	Bid(ctx context.Context, in *BidRequest, opts ...grpc.CallOption) (*BidResponse, error)
 	Ask(ctx context.Context, in *AskRequest, opts ...grpc.CallOption) (*AskResponse, error)
 	GetBids(ctx context.Context, in *GetBidsRequest, opts ...grpc.CallOption) (*GetBidsResponse, error)
@@ -37,6 +40,47 @@ type serviceClient struct {
 
 func NewServiceClient(cc grpc.ClientConnInterface) ServiceClient {
 	return &serviceClient{cc}
+}
+
+func (c *serviceClient) GetArtworkDetails(ctx context.Context, in *GetArtworkDetailsRequest, opts ...grpc.CallOption) (*GetArtworkDetailsResponse, error) {
+	out := new(GetArtworkDetailsResponse)
+	err := c.cc.Invoke(ctx, "/service.Service/GetArtworkDetails", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceClient) GetArtworkLiveData(ctx context.Context, in *GetArtworkLiveDataRequest, opts ...grpc.CallOption) (Service_GetArtworkLiveDataClient, error) {
+	stream, err := c.cc.NewStream(ctx, &Service_ServiceDesc.Streams[0], "/service.Service/GetArtworkLiveData", opts...)
+	if err != nil {
+		return nil, err
+	}
+	x := &serviceGetArtworkLiveDataClient{stream}
+	if err := x.ClientStream.SendMsg(in); err != nil {
+		return nil, err
+	}
+	if err := x.ClientStream.CloseSend(); err != nil {
+		return nil, err
+	}
+	return x, nil
+}
+
+type Service_GetArtworkLiveDataClient interface {
+	Recv() (*GetArtworkLiveDataResponse, error)
+	grpc.ClientStream
+}
+
+type serviceGetArtworkLiveDataClient struct {
+	grpc.ClientStream
+}
+
+func (x *serviceGetArtworkLiveDataClient) Recv() (*GetArtworkLiveDataResponse, error) {
+	m := new(GetArtworkLiveDataResponse)
+	if err := x.ClientStream.RecvMsg(m); err != nil {
+		return nil, err
+	}
+	return m, nil
 }
 
 func (c *serviceClient) GetArtworksByTitle(ctx context.Context, in *GetArtworksByTitleRequest, opts ...grpc.CallOption) (*GetArtworksByTitleResponse, error) {
@@ -60,6 +104,15 @@ func (c *serviceClient) GetArtworksByArtist(ctx context.Context, in *GetArtworks
 func (c *serviceClient) GetUserProfile(ctx context.Context, in *GetUserProfileRequest, opts ...grpc.CallOption) (*GetUserProfileResponse, error) {
 	out := new(GetUserProfileResponse)
 	err := c.cc.Invoke(ctx, "/service.Service/GetUserProfile", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *serviceClient) CreateUserProfile(ctx context.Context, in *CreateUserProfileRequest, opts ...grpc.CallOption) (*CreateUserProfileResponse, error) {
+	out := new(CreateUserProfileResponse)
+	err := c.cc.Invoke(ctx, "/service.Service/CreateUserProfile", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,9 +159,12 @@ func (c *serviceClient) GetAsks(ctx context.Context, in *GetAsksRequest, opts ..
 // All implementations must embed UnimplementedServiceServer
 // for forward compatibility
 type ServiceServer interface {
+	GetArtworkDetails(context.Context, *GetArtworkDetailsRequest) (*GetArtworkDetailsResponse, error)
+	GetArtworkLiveData(*GetArtworkLiveDataRequest, Service_GetArtworkLiveDataServer) error
 	GetArtworksByTitle(context.Context, *GetArtworksByTitleRequest) (*GetArtworksByTitleResponse, error)
 	GetArtworksByArtist(context.Context, *GetArtworksByArtistRequest) (*GetArtworksByArtistResponse, error)
 	GetUserProfile(context.Context, *GetUserProfileRequest) (*GetUserProfileResponse, error)
+	CreateUserProfile(context.Context, *CreateUserProfileRequest) (*CreateUserProfileResponse, error)
 	Bid(context.Context, *BidRequest) (*BidResponse, error)
 	Ask(context.Context, *AskRequest) (*AskResponse, error)
 	GetBids(context.Context, *GetBidsRequest) (*GetBidsResponse, error)
@@ -120,6 +176,12 @@ type ServiceServer interface {
 type UnimplementedServiceServer struct {
 }
 
+func (UnimplementedServiceServer) GetArtworkDetails(context.Context, *GetArtworkDetailsRequest) (*GetArtworkDetailsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetArtworkDetails not implemented")
+}
+func (UnimplementedServiceServer) GetArtworkLiveData(*GetArtworkLiveDataRequest, Service_GetArtworkLiveDataServer) error {
+	return status.Errorf(codes.Unimplemented, "method GetArtworkLiveData not implemented")
+}
 func (UnimplementedServiceServer) GetArtworksByTitle(context.Context, *GetArtworksByTitleRequest) (*GetArtworksByTitleResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetArtworksByTitle not implemented")
 }
@@ -128,6 +190,9 @@ func (UnimplementedServiceServer) GetArtworksByArtist(context.Context, *GetArtwo
 }
 func (UnimplementedServiceServer) GetUserProfile(context.Context, *GetUserProfileRequest) (*GetUserProfileResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUserProfile not implemented")
+}
+func (UnimplementedServiceServer) CreateUserProfile(context.Context, *CreateUserProfileRequest) (*CreateUserProfileResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method CreateUserProfile not implemented")
 }
 func (UnimplementedServiceServer) Bid(context.Context, *BidRequest) (*BidResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Bid not implemented")
@@ -152,6 +217,45 @@ type UnsafeServiceServer interface {
 
 func RegisterServiceServer(s grpc.ServiceRegistrar, srv ServiceServer) {
 	s.RegisterService(&Service_ServiceDesc, srv)
+}
+
+func _Service_GetArtworkDetails_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetArtworkDetailsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).GetArtworkDetails(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.Service/GetArtworkDetails",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).GetArtworkDetails(ctx, req.(*GetArtworkDetailsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Service_GetArtworkLiveData_Handler(srv interface{}, stream grpc.ServerStream) error {
+	m := new(GetArtworkLiveDataRequest)
+	if err := stream.RecvMsg(m); err != nil {
+		return err
+	}
+	return srv.(ServiceServer).GetArtworkLiveData(m, &serviceGetArtworkLiveDataServer{stream})
+}
+
+type Service_GetArtworkLiveDataServer interface {
+	Send(*GetArtworkLiveDataResponse) error
+	grpc.ServerStream
+}
+
+type serviceGetArtworkLiveDataServer struct {
+	grpc.ServerStream
+}
+
+func (x *serviceGetArtworkLiveDataServer) Send(m *GetArtworkLiveDataResponse) error {
+	return x.ServerStream.SendMsg(m)
 }
 
 func _Service_GetArtworksByTitle_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
@@ -204,6 +308,24 @@ func _Service_GetUserProfile_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(ServiceServer).GetUserProfile(ctx, req.(*GetUserProfileRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Service_CreateUserProfile_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(CreateUserProfileRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ServiceServer).CreateUserProfile(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/service.Service/CreateUserProfile",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ServiceServer).CreateUserProfile(ctx, req.(*CreateUserProfileRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -288,6 +410,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 	HandlerType: (*ServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
+			MethodName: "GetArtworkDetails",
+			Handler:    _Service_GetArtworkDetails_Handler,
+		},
+		{
 			MethodName: "GetArtworksByTitle",
 			Handler:    _Service_GetArtworksByTitle_Handler,
 		},
@@ -298,6 +424,10 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetUserProfile",
 			Handler:    _Service_GetUserProfile_Handler,
+		},
+		{
+			MethodName: "CreateUserProfile",
+			Handler:    _Service_CreateUserProfile_Handler,
 		},
 		{
 			MethodName: "Bid",
@@ -316,6 +446,12 @@ var Service_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Service_GetAsks_Handler,
 		},
 	},
-	Streams:  []grpc.StreamDesc{},
+	Streams: []grpc.StreamDesc{
+		{
+			StreamName:    "GetArtworkLiveData",
+			Handler:       _Service_GetArtworkLiveData_Handler,
+			ServerStreams: true,
+		},
+	},
 	Metadata: "service/service.proto",
 }
